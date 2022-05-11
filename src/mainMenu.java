@@ -39,9 +39,13 @@ public final class mainMenu extends javax.swing.JFrame {
         treeModel = (DefaultTreeModel) databaseTree.getModel();
         treeModel.setRoot(databases);
         DatabaseMetaData metadata = con.getMetaData();
-
-        ResultSet rs = metadata.getCatalogs();
-
+        ResultSet rs;
+        if(metadata.getDatabaseProductName() == "PostgreSQL"){
+            Statement stmt = con.createStatement();
+            rs = stmt.executeQuery("select datname from pg_database");
+        }else{
+            rs = metadata.getCatalogs();
+        }
         while(rs.next()){
             String database = rs.getString(1);
             DefaultMutableTreeNode dat = new DefaultMutableTreeNode(database);

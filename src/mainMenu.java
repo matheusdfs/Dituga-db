@@ -14,13 +14,14 @@ public final class mainMenu extends javax.swing.JFrame {
     
     public mainMenu() throws SQLException {
         initComponents();
-        conectToDB("jdbc:postgresql://localhost", "postgres", "postgres");
+        conectToDB("jdbc:mysql://localhost/game_menu?useTimezone=true&serverTimezone=UTC", "root", "root123");
         //initializeDatabaseTree();
     }
     
     public void conectToDB(String url, String user, String password) throws SQLException
     {
         con = DriverManager.getConnection(url, user, password);
+        DatabaseMetaData dbmt = con.getMetaData();
     }
     
     public void initializeDatabaseTree() throws SQLException
@@ -51,6 +52,8 @@ public final class mainMenu extends javax.swing.JFrame {
         jScrollPane3 = new javax.swing.JScrollPane();
         insertQuery = new javax.swing.JTextArea();
         run = new javax.swing.JButton();
+        jScrollPane1 = new javax.swing.JScrollPane();
+        jTable1 = new javax.swing.JTable();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
 
@@ -67,6 +70,19 @@ public final class mainMenu extends javax.swing.JFrame {
             }
         });
 
+        jTable1.setModel(new javax.swing.table.DefaultTableModel(
+            new Object [][] {
+                {null, null, null, null},
+                {null, null, null, null},
+                {null, null, null, null},
+                {null, null, null, null}
+            },
+            new String [] {
+                "Title 1", "Title 2", "Title 3", "Title 4"
+            }
+        ));
+        jScrollPane1.setViewportView(jTable1);
+
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
@@ -76,10 +92,11 @@ public final class mainMenu extends javax.swing.JFrame {
                 .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, 126, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(jScrollPane3, javax.swing.GroupLayout.DEFAULT_SIZE, 859, Short.MAX_VALUE)
                     .addGroup(layout.createSequentialGroup()
                         .addComponent(run)
-                        .addGap(0, 0, Short.MAX_VALUE)))
+                        .addGap(0, 0, Short.MAX_VALUE))
+                    .addComponent(jScrollPane3)
+                    .addComponent(jScrollPane1, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, 859, Short.MAX_VALUE))
                 .addContainerGap())
         );
         layout.setVerticalGroup(
@@ -92,7 +109,8 @@ public final class mainMenu extends javax.swing.JFrame {
                         .addComponent(jScrollPane3, javax.swing.GroupLayout.PREFERRED_SIZE, 142, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(run)
-                        .addGap(0, 0, Short.MAX_VALUE)))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE)))
                 .addContainerGap())
         );
 
@@ -104,9 +122,14 @@ public final class mainMenu extends javax.swing.JFrame {
         try {
             Statement stmt = con.createStatement();
             ResultSet rs = stmt.executeQuery(this.insertQuery.getText());
-            System.out.println(rs);
+            ResultSetMetaData rsmd = rs.getMetaData();
+            
+            
+            //System.out.println(rsmd.getColumnName(12));
+            System.out.println(rsmd.getColumnCount());
         } catch (SQLException ex) {
-            Logger.getLogger(mainMenu.class.getName()).log(Level.SEVERE, null, ex);
+            System.out.println(ex);
+            //Logger.getLogger(mainMenu.class.getName()).log(Level.SEVERE, null, ex);
         }
     }//GEN-LAST:event_runActionPerformed
 
@@ -152,8 +175,10 @@ public final class mainMenu extends javax.swing.JFrame {
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JTree databaseTree;
     private javax.swing.JTextArea insertQuery;
+    private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JScrollPane jScrollPane2;
     private javax.swing.JScrollPane jScrollPane3;
+    private javax.swing.JTable jTable1;
     private javax.swing.JButton run;
     // End of variables declaration//GEN-END:variables
 }

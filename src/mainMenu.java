@@ -4,7 +4,8 @@ import java.util.logging.Logger;
 import javax.swing.JTable;
 import javax.swing.JTree;
 import javax.swing.tree.DefaultMutableTreeNode;
-import org.
+import net.proteanit.sql.DbUtils;
+
 /**
  *
  * @author matheus
@@ -15,7 +16,7 @@ public final class mainMenu extends javax.swing.JFrame {
     
     public mainMenu() throws SQLException {
         initComponents();
-        conectToDB("jdbc:mysql://localhost/game_menu?useTimezone=true&serverTimezone=UTC", "root", "root123");
+        conectToDB("jdbc:mysql://localhost/?useTimezone=true&serverTimezone=UTC", "root", "root123");
         //initializeDatabaseTree();
     }
     
@@ -125,7 +126,7 @@ public final class mainMenu extends javax.swing.JFrame {
             ResultSet rs = stmt.executeQuery(this.insertQuery.getText());
             ResultSetMetaData rsmd = rs.getMetaData();
             
-            int column = rsmd.getColumnCount();
+            /*int column = rsmd.getColumnCount();
             String[][] title = new String[1][column];
             for(int i = 0; i < column; i++)
             {
@@ -143,9 +144,9 @@ public final class mainMenu extends javax.swing.JFrame {
                 "Speed reading"},
                 {"Joe", "Brown",
                 "Pool"}
-            };
+            };*/
             System.out.println("melhor do mundo receba");
-            this.mainTable = new JTable(data, title);
+            this.mainTable.setModel(DbUtils.resultSetToTableModel(rs));
                     
             //this.mainTable.setModel(DbUtils.resultSetToTableModel(rs));
             

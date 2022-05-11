@@ -1,9 +1,12 @@
 import java.sql.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.swing.JTable;
 import javax.swing.JTree;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeModel;
+import net.proteanit.sql.DbUtils;
+
 
 /**
  *
@@ -18,7 +21,6 @@ public final class mainMenu extends javax.swing.JFrame {
         initComponents();
         conectToDB("jdbc:postgresql://localhost/testdb", "postgres", "postgres");
         initializeDatabaseTree();
-
     }
     
     public void conectToDB(String url, String user, String password) throws SQLException
@@ -79,7 +81,7 @@ public final class mainMenu extends javax.swing.JFrame {
         insertQuery = new javax.swing.JTextArea();
         run = new javax.swing.JButton();
         jScrollPane1 = new javax.swing.JScrollPane();
-        jTable1 = new javax.swing.JTable();
+        mainTable = new javax.swing.JTable();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
 
@@ -101,7 +103,7 @@ public final class mainMenu extends javax.swing.JFrame {
             }
         });
 
-        jTable1.setModel(new javax.swing.table.DefaultTableModel(
+        mainTable.setModel(new javax.swing.table.DefaultTableModel(
             new Object [][] {
                 {null, null, null, null},
                 {null, null, null, null},
@@ -112,7 +114,7 @@ public final class mainMenu extends javax.swing.JFrame {
                 "Title 1", "Title 2", "Title 3", "Title 4"
             }
         ));
-        jScrollPane1.setViewportView(jTable1);
+        jScrollPane1.setViewportView(mainTable);
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
@@ -155,20 +157,29 @@ public final class mainMenu extends javax.swing.JFrame {
             ResultSet rs = stmt.executeQuery(this.insertQuery.getText());
             ResultSetMetaData rsmd = rs.getMetaData();
             
-            int column = rsmd.getColumnCount();
-            String[][] table = new String[11][column];
+            /*int column = rsmd.getColumnCount();
+            String[][] title = new String[1][column];
             for(int i = 0; i < column; i++)
             {
-                table[0][i] = rsmd.getColumnName(i+1);
+                title[0][i] = rsmd.getColumnName(i+1);
             }
-            /*while (resultSet.next()) {
-                for (int i = 1; i <= columnsNumber; i++) {
-                    if (i > 1) System.out.print(",  ");
-                    String columnValue = resultSet.getString(i);
-                    System.out.print(columnValue + " " + rsmd.getColumnName(i));
-                }
-                System.out.println("");
-            }*/
+            
+            String[][] data = {
+                {"Kathy", "Smith",
+                "Snowboarding"},
+                {"John", "Doe",
+                "Rowing"},
+                {"Sue", "Black",
+                "Knitting"},
+                {"Jane", "White",
+                "Speed reading"},
+                {"Joe", "Brown",
+                "Pool"}
+            };*/
+            System.out.println("melhor do mundo receba");
+            this.mainTable.setModel(DbUtils.resultSetToTableModel(rs));
+                    
+            //this.mainTable.setModel(DbUtils.resultSetToTableModel(rs));
             
         } catch (SQLException ex) {
             System.out.println(ex);
@@ -241,7 +252,7 @@ public final class mainMenu extends javax.swing.JFrame {
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JScrollPane jScrollPane2;
     private javax.swing.JScrollPane jScrollPane3;
-    private javax.swing.JTable jTable1;
+    private javax.swing.JTable mainTable;
     private javax.swing.JButton run;
     // End of variables declaration//GEN-END:variables
 }

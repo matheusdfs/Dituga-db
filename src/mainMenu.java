@@ -31,9 +31,8 @@ public final class mainMenu extends javax.swing.JFrame {
     {
         
         DefaultMutableTreeNode databases = new DefaultMutableTreeNode("Databases");
-        treeModel = new DefaultTreeModel(databases);
-        databaseTree = new JTree(treeModel);
-        jScrollPane2.setViewportView(databaseTree);
+        treeModel = (DefaultTreeModel) databaseTree.getModel();
+        treeModel.setRoot(databases);
         DatabaseMetaData metadata = con.getMetaData();
 
         ResultSet rs = metadata.getCatalogs();

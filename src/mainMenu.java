@@ -3,6 +3,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.JTree;
 import javax.swing.tree.DefaultMutableTreeNode;
+import javax.swing.tree.DefaultTreeModel;
 
 /**
  *
@@ -11,11 +12,12 @@ import javax.swing.tree.DefaultMutableTreeNode;
 public final class mainMenu extends javax.swing.JFrame {
 
     Connection con = null;
+    private DefaultTreeModel treeModel;
     
     public mainMenu() throws SQLException {
         initComponents();
-        conectToDB("jdbc:postgresql://localhost", "postgres", "postgres");
-        //initializeDatabaseTree();
+        conectToDB("jdbc:postgresql://localhost/testdb", "postgres", "postgres");
+        initializeDatabaseTree();
     }
     
     public void conectToDB(String url, String user, String password) throws SQLException
@@ -25,16 +27,40 @@ public final class mainMenu extends javax.swing.JFrame {
     
     public void initializeDatabaseTree() throws SQLException
     {
-        Statement stmt = con.createStatement();
-        ResultSet rs = stmt.executeQuery("select table_name from dba_tables;");
+        
         DefaultMutableTreeNode databases = new DefaultMutableTreeNode("Databases");
+        treeModel = new DefaultTreeModel(databases);
+        databaseTree = new JTree(treeModel);
+        jScrollPane2.setViewportView(databaseTree);
+        DatabaseMetaData metadata = con.getMetaData();
+
+        ResultSet rs = metadata.getCatalogs();
+
         while(rs.next()){
-            String database = rs.getString("Database");
+            String database = rs.getString(1);
             DefaultMutableTreeNode dat = new DefaultMutableTreeNode(database);
-            databases.add(dat);
+            treeModel.insertNodeInto(dat, databases, 0);  
+            DefaultMutableTreeNode table = new DefaultMutableTreeNode("Tables");
+            DefaultMutableTreeNode view = new DefaultMutableTreeNode("Views");
+            treeModel.insertNodeInto(view, dat, 0);
+            treeModel.insertNodeInto(table, dat, 0);
+            
+            loadTables(table);
         }
-        //databaseTree.add(databases);
-        databaseTree = new JTree(databases);
+    
+
+    }
+
+    
+    private void loadTables(DefaultMutableTreeNode database) throws SQLException{
+        DatabaseMetaData metadata = con.getMetaData();
+        String[] t = {"TABLE"};
+        ResultSet rs = metadata.getTables(null, null, "%", t);
+        while(rs.next()){
+            String tabname = rs.getString("TABLE_NAME");
+            DefaultMutableTreeNode tab = new DefaultMutableTreeNode(tabname);
+            treeModel.insertNodeInto(tab,database, 0);
+        }
     }
 
     /**

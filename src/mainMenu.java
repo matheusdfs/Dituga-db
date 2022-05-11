@@ -83,6 +83,11 @@ public final class mainMenu extends javax.swing.JFrame {
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
 
+        databaseTree.addTreeSelectionListener(new javax.swing.event.TreeSelectionListener() {
+            public void valueChanged(javax.swing.event.TreeSelectionEvent evt) {
+                databaseTreeValueChanged(evt);
+            }
+        });
         jScrollPane2.setViewportView(databaseTree);
 
         insertQuery.setColumns(20);
@@ -170,6 +175,26 @@ public final class mainMenu extends javax.swing.JFrame {
             //Logger.getLogger(mainMenu.class.getName()).log(Level.SEVERE, null, ex);
         }
     }//GEN-LAST:event_runActionPerformed
+
+    private void databaseTreeValueChanged(javax.swing.event.TreeSelectionEvent evt) {//GEN-FIRST:event_databaseTreeValueChanged
+        DefaultMutableTreeNode node = (DefaultMutableTreeNode)databaseTree.getLastSelectedPathComponent();
+        if(node == null){
+            return;
+        }
+        if(node.isLeaf()){
+            String table = (String) node.getUserObject();
+            try{
+                DatabaseMetaData meta = con.getMetaData();
+                ResultSet rs = meta.getColumns(null,null,table,null);
+                while(rs.next()){
+                    System.out.println(rs.getString( "COLUMN_NAME"));
+                }
+                }catch (SQLException ex) {
+            System.out.println(ex);
+            //Logger.getLogger(mainMenu.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        }
+    }//GEN-LAST:event_databaseTreeValueChanged
 
     /**
      * @param args the command line arguments

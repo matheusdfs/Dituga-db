@@ -49,6 +49,7 @@ public final class mainMenu extends javax.swing.JFrame {
             treeModel.insertNodeInto(table, dat, 0);
             
             loadTables(table);
+            loadViews(view);
         }
     
 
@@ -57,13 +58,30 @@ public final class mainMenu extends javax.swing.JFrame {
     
     private void loadTables(DefaultMutableTreeNode database) throws SQLException{
         DatabaseMetaData metadata = con.getMetaData();
+        DefaultMutableTreeNode node = (DefaultMutableTreeNode)database.getParent();
+        String name = (String) node.getUserObject();
         String[] t = {"TABLE"};
-        ResultSet rs = metadata.getTables(null, null, "%", t);
+        ResultSet rs = metadata.getTables(name, null, "%", t);
         while(rs.next()){
             String tabname = rs.getString("TABLE_NAME");
             DefaultMutableTreeNode tab = new DefaultMutableTreeNode(tabname);
             treeModel.insertNodeInto(tab,database, 0);
         }
+
+        
+    }
+    private void loadViews(DefaultMutableTreeNode database) throws SQLException{
+        DatabaseMetaData metadata = con.getMetaData();
+        DefaultMutableTreeNode node = (DefaultMutableTreeNode)database.getParent();
+        String name = (String) node.getUserObject();
+        String[] t = {"VIEW"};
+        ResultSet vs = metadata.getTables(name, null, "%", t);
+        while(vs.next()){
+            String tabname = vs.getString("TABLE_NAME");
+            DefaultMutableTreeNode tab = new DefaultMutableTreeNode(tabname);
+            treeModel.insertNodeInto(tab,database, 0);
+        }
+        
     }
 
     /**

@@ -124,9 +124,21 @@ public final class mainMenu extends javax.swing.JFrame {
             ResultSet rs = stmt.executeQuery(this.insertQuery.getText());
             ResultSetMetaData rsmd = rs.getMetaData();
             
+            int column = rsmd.getColumnCount();
+            String[][] table = new String[11][column];
+            for(int i = 0; i < column; i++)
+            {
+                table[0][i] = rsmd.getColumnName(i+1);
+            }
+            /*while (resultSet.next()) {
+                for (int i = 1; i <= columnsNumber; i++) {
+                    if (i > 1) System.out.print(",  ");
+                    String columnValue = resultSet.getString(i);
+                    System.out.print(columnValue + " " + rsmd.getColumnName(i));
+                }
+                System.out.println("");
+            }*/
             
-            //System.out.println(rsmd.getColumnName(12));
-            System.out.println(rsmd.getColumnCount());
         } catch (SQLException ex) {
             System.out.println(ex);
             //Logger.getLogger(mainMenu.class.getName()).log(Level.SEVERE, null, ex);

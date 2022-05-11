@@ -18,8 +18,11 @@ public final class mainMenu extends javax.swing.JFrame {
     private DefaultTreeModel treeModel;
     
     public mainMenu() throws SQLException {
+        LoginDialog ld = new LoginDialog(this, true);
+        ld.setVisible(true);
         initComponents();
-        conectToDB("jdbc:postgresql://localhost/testdb", "postgres", "postgres");
+        String db = ld.getDB().toLowerCase();
+        conectToDB("jdbc:"+ db +"://localhost/", ld.getLogin(), ld.getSenha());
         initializeDatabaseTree();
     }
     
@@ -215,9 +218,7 @@ public final class mainMenu extends javax.swing.JFrame {
             try{
                 DatabaseMetaData meta = con.getMetaData();
                 ResultSet rs = meta.getColumns(null,null,table,null);
-                while(rs.next()){
-                    System.out.println(rs.getString( "COLUMN_NAME"));
-                }
+                this.mainTable.setModel(DbUtils.resultSetToTableModel(rs));
                 }catch (SQLException ex) {
             System.out.println(ex);
             //Logger.getLogger(mainMenu.class.getName()).log(Level.SEVERE, null, ex);

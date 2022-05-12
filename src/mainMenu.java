@@ -1,12 +1,16 @@
+import java.io.FileWriter;
+import java.io.IOException;
 import java.sql.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import javax.swing.JTable;
-import javax.swing.JTree;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeModel;
 import net.proteanit.sql.DbUtils;
-
+import com.opencsv.CSVWriter;
+import org.json.JSONArray;
+import org.json.JSONObject;
+import java.io.File;
+import java.io.IOException;
 
 /**
  *
@@ -16,13 +20,14 @@ public final class mainMenu extends javax.swing.JFrame {
 
     Connection con = null;
     private DefaultTreeModel treeModel;
+    ResultSet rs = null;
     
     public mainMenu() throws SQLException {
         LoginDialog ld = new LoginDialog(this, true);
         ld.setVisible(true);
         initComponents();
         String db = ld.getDB().toLowerCase();
-        conectToDB("jdbc:"+ db +"://localhost/", ld.getLogin(), ld.getSenha());
+        conectToDB("jdbc:"+ db +"://localhost/?useTimezone=true&serverTimezone=UTC", ld.getLogin(), ld.getSenha());
         initializeDatabaseTree();
     }
     
@@ -107,6 +112,8 @@ public final class mainMenu extends javax.swing.JFrame {
         run = new javax.swing.JButton();
         jScrollPane1 = new javax.swing.JScrollPane();
         mainTable = new javax.swing.JTable();
+        jButton1 = new javax.swing.JButton();
+        jButton2 = new javax.swing.JButton();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
 
@@ -141,6 +148,20 @@ public final class mainMenu extends javax.swing.JFrame {
         ));
         jScrollPane1.setViewportView(mainTable);
 
+        jButton1.setText("Export as csv");
+        jButton1.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButton1ActionPerformed(evt);
+            }
+        });
+
+        jButton2.setText("Export as JSON");
+        jButton2.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButton2ActionPerformed(evt);
+            }
+        });
+
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
@@ -152,7 +173,10 @@ public final class mainMenu extends javax.swing.JFrame {
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(layout.createSequentialGroup()
                         .addComponent(run)
-                        .addGap(0, 0, Short.MAX_VALUE))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addComponent(jButton2)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(jButton1))
                     .addComponent(jScrollPane3)
                     .addComponent(jScrollPane1, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, 859, Short.MAX_VALUE))
                 .addContainerGap())
@@ -166,7 +190,10 @@ public final class mainMenu extends javax.swing.JFrame {
                     .addGroup(layout.createSequentialGroup()
                         .addComponent(jScrollPane3, javax.swing.GroupLayout.PREFERRED_SIZE, 142, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(run)
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                            .addComponent(run)
+                            .addComponent(jButton1)
+                            .addComponent(jButton2))
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE)))
                 .addContainerGap())
@@ -179,39 +206,31 @@ public final class mainMenu extends javax.swing.JFrame {
         System.out.println(this.insertQuery.getText());
         try {
             Statement stmt = con.createStatement();
-            ResultSet rs = stmt.executeQuery(this.insertQuery.getText());
+            rs = stmt.executeQuery(this.insertQuery.getText());
             ResultSetMetaData rsmd = rs.getMetaData();
-            
-            /*int column = rsmd.getColumnCount();
-            String[][] title = new String[1][column];
-            for(int i = 0; i < column; i++)
-            {
-                title[0][i] = rsmd.getColumnName(i+1);
-            }
-            
-            String[][] data = {
-                {"Kathy", "Smith",
-                "Snowboarding"},
-                {"John", "Doe",
-                "Rowing"},
-                {"Sue", "Black",
-                "Knitting"},
-                {"Jane", "White",
-                "Speed reading"},
-                {"Joe", "Brown",
-                "Pool"}
-            };*/
-            System.out.println("melhor do mundo receba");
+
             this.mainTable.setModel(DbUtils.resultSetToTableModel(rs));
-                    
-            //this.mainTable.setModel(DbUtils.resultSetToTableModel(rs));
-            
         } catch (SQLException ex) {
             System.out.println(ex);
-            //Logger.getLogger(mainMenu.class.getName()).log(Level.SEVERE, null, ex);
         }
     }//GEN-LAST:event_runActionPerformed
 
+    public static JSONArray convert(ResultSet resultSet) throws Exception {
+        JSONArray jsonArray = new JSONArray();
+
+        while (resultSet.next()) {
+
+            int columns = resultSet.getMetaData().getColumnCount();
+            JSONObject obj = new JSONObject();
+
+            for (int i = 0; i < columns; i++)
+                obj.put(resultSet.getMetaData().getColumnLabel(i + 1).toLowerCase(), resultSet.getObject(i + 1));
+
+            jsonArray.put(obj);
+        }
+        return jsonArray;
+    }
+    
     private void databaseTreeValueChanged(javax.swing.event.TreeSelectionEvent evt) {//GEN-FIRST:event_databaseTreeValueChanged
         DefaultMutableTreeNode node = (DefaultMutableTreeNode)databaseTree.getLastSelectedPathComponent();
         if(node == null){
@@ -229,6 +248,31 @@ public final class mainMenu extends javax.swing.JFrame {
         }
         }
     }//GEN-LAST:event_databaseTreeValueChanged
+
+    private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
+        try {
+            rs.first();
+            CSVWriter writer = new CSVWriter(new FileWriter("csvData.csv"), '\t');
+            writer.writeAll(rs, true);
+            writer.close();
+        } catch (IOException ex) {
+            Logger.getLogger(mainMenu.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (SQLException ex) {
+            Logger.getLogger(mainMenu.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }//GEN-LAST:event_jButton1ActionPerformed
+
+    private void jButton2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton2ActionPerformed
+        try {
+            rs.first();
+            FileWriter myObj = new FileWriter("./jsonData.txt");
+            myObj.write(convert(rs).toString());
+            myObj.close();
+            System.out.println(convert(rs));
+        } catch (Exception ex) {
+            Logger.getLogger(mainMenu.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }//GEN-LAST:event_jButton2ActionPerformed
 
     /**
      * @param args the command line arguments
@@ -272,6 +316,8 @@ public final class mainMenu extends javax.swing.JFrame {
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JTree databaseTree;
     private javax.swing.JTextArea insertQuery;
+    private javax.swing.JButton jButton1;
+    private javax.swing.JButton jButton2;
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JScrollPane jScrollPane2;
     private javax.swing.JScrollPane jScrollPane3;

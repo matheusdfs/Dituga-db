@@ -1,0 +1,1 @@
+[{"id":1,"name":"Graveyard","difficulty":2},{"id":2,"name":"Stage","difficulty":3}]
